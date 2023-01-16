@@ -318,9 +318,8 @@ def getHeight(img,outputBg, contourCoorList, fileName, ori):
   height_cm = round(height_cm, 2)
   return height_cm
 
-def getBoneHeightWithImage(imagePath, maskRGB_arr):
-    ori = cv2.imread(imagePath)
-    ori = cv2.cvtColor(ori, cv2.COLOR_BGR2RGB)
+def getBoneHeightWithImage(ori_input_image, maskRGB_arr):
+    ori = cv2.cvtColor(ori_input_image, cv2.COLOR_BGR2RGB)
     image = maskRGB_arr.copy()
     rgb2mask(image)
 

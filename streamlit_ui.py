@@ -74,11 +74,11 @@ with left:
     type=['png','jpg', 'jpeg'],
     accept_multiple_files=False
     )
-    with open("sample_image_input.png", "rb") as file:
+    with open("sample_image_input.JPG", "rb") as file:
         btn = st.download_button(
             label="Download image input sample",
             data=file,
-            file_name="sample_image_input.png",
+            file_name="sample_image_input.JPG",
             mime="image/png"
         )
     boneHeightImage = Image.open('boneHeightRange2.png')
@@ -234,11 +234,14 @@ def regionIsValid(path, h):
 if uploaded_data is not None:
     with st.spinner('Loading...'):
         imagePath = save_file(uploaded_data)     
-        open_cv_image = cv2.imread(imagePath, cv2.IMREAD_GRAYSCALE)
-        height, width = open_cv_image.shape[0], open_cv_image.shape[1]
-        open_cv_image = cv2.cvtColor(open_cv_image, cv2.COLOR_GRAY2RGB)
+        ori_input_image = cv2.imread(imagePath, cv2.IMREAD_GRAYSCALE)
 
-        t2 = A.Compose([A.Resize(height,width)])
+        ori_input_image = ori_input_image[25:556, 245:1295]
+
+        height, width = ori_input_image.shape[0], ori_input_image.shape[1]
+        open_cv_image = cv2.cvtColor(ori_input_image, cv2.COLOR_GRAY2RGB)
+
+        t2 = A.Compose([A.Resize(969,1908)])
     
         # bone severity classification
         tf_data = tf(open_cv_image)
@@ -275,8 +278,9 @@ if uploaded_data is not None:
             pred_data = Image.open(final_mask)
 
             rgb_final_mask= t2(image=rgb_final_mask)['image']
+            final_input_image = t2(image=ori_input_image)['image']
 
-            boneHeightC, boneHeightL, boneHeightR = bhm.getBoneHeightWithImage(imagePath, rgb_final_mask)
+            boneHeightC, boneHeightL, boneHeightR = bhm.getBoneHeightWithImage(final_input_image, rgb_final_mask)
 
             estSevCR = getEstSev(boneHeightR, "r")
             estSevCC = getEstSev(boneHeightC, "c")
