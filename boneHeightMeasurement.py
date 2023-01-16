@@ -55,7 +55,7 @@ def addContour(outputBg, mask, maskColor, image):
 
   ret,thresh = cv2.threshold(mask, 40, 255, 0)
   contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-
+  c = []
   if len(contours) != 0:
 
     # find the biggest countour (c) by the area
@@ -122,7 +122,7 @@ def finalPlot(filtered_x_upper_coors, filtered_x_lower_coors, middle_coors, foun
 
   # plt.plot(other_plt_x,other_plt_y, color='y', linewidth=5)
   plt.plot(x_plt,y_plt, color='yellow', linewidth=3)
-  plt.plot(matched_px,matched_py, color='black', linewidth=3)
+  plt.plot(matched_px,matched_py, color='red', linewidth=3)
 
   plt.imshow(ori)
 
@@ -130,7 +130,7 @@ def finalPlot(filtered_x_upper_coors, filtered_x_lower_coors, middle_coors, foun
   fig.add_axes(ax)
 
   plt.gca().invert_yaxis()
-  plt.savefig(f'my_plot_{fileName}.png', transparent=True)
+  plt.savefig(f'my_plot_{fileName}.png', transparent=True,bbox_inches='tight')
 
 def getUpAndLowCoor(squeezed_cr, index_tl, index_tr, index_bl, index_br, top_left, top_right):
   upper_coors, lower_coors = [], []
@@ -176,6 +176,7 @@ def order_points(pts):
     # now, compute the difference between the points, the
     # top-right point will have the smallest difference,
     # whereas the bottom-left will have the largest difference
+
     diff = np.diff(pts, axis = 1)
     rect[1] = pts[np.argmin(diff)]
     rect[3] = pts[np.argmax(diff)]
@@ -187,6 +188,9 @@ def getHeight(img,outputBg, contourCoorList, fileName, ori):
   ori_edges = plotEdgePoints(outputBg, contourCoorList)
   ori_edges = [list(ele) for ele in ori_edges]
   squeezed_cr = contourCoorList.copy().squeeze().tolist()
+
+  if(np.array(squeezed_cr).ndim < 2):
+    return 0
 
   edges = order_points(np.array(squeezed_cr))
   top_left = edges[0]
@@ -201,6 +205,9 @@ def getHeight(img,outputBg, contourCoorList, fileName, ori):
   while(flag):
     if(dup in temp_edges):
       temp_edges.remove(dup)
+    
+    if(np.array(temp_edges).ndim < 2):
+      break
 
     f_edges = order_points(np.array(temp_edges))
     flag, dup = checkIfDuplicates_3(f_edges)
@@ -215,6 +222,9 @@ def getHeight(img,outputBg, contourCoorList, fileName, ori):
         bottom_right = f_edges[2]
       if(f_edges[3] == edges[3] or f_edges[3][0] <= edges[3][0]):
         bottom_left = f_edges[3]  
+  
+  if flag:
+    return 0
 
   index_tl = squeezed_cr.index(top_left)
   index_tr = squeezed_cr.index(top_right)
@@ -262,6 +272,9 @@ def getHeight(img,outputBg, contourCoorList, fileName, ori):
     m = -1 / find_gradient(bottom_left, bottom_right)
     test_x = (test_y-bottom_left[1])/m + bottom_left[0]
 
+  if(np.array(filtered_x_upper_coors).ndim < 2):
+    return 0
+
   filtered_x_upper_y = np.array(filtered_x_upper_coors)[:,1]
   target_coors = []
   for idx, i in enumerate(filtered_x_lower_coors):
@@ -291,6 +304,9 @@ def getHeight(img,outputBg, contourCoorList, fileName, ori):
   found_match = [target_coors[i] for i in found_idx]
   distance_list = [math.dist(i['upper'], i['lower']) for i in found_match] 
 
+  if len(distance_list) == 0:
+    return 0
+
   height = min(distance_list)
 
   height_index = distance_list.index(height)
@@ -299,14 +315,14 @@ def getHeight(img,outputBg, contourCoorList, fileName, ori):
   finalPlot(filtered_x_upper_coors, filtered_x_lower_coors, middle_coors, found_match, bottom_left, bottom_right, test_x, test_y, matched, fileName, ori)
 
   height_cm = height * 2.54 / 96
+  height_cm = round(height_cm, 2)
   return height_cm
 
 def getBoneHeightWithImage(imagePath, maskRGB_arr):
     ori = cv2.imread(imagePath)
     ori = cv2.cvtColor(ori, cv2.COLOR_BGR2RGB)
     image = maskRGB_arr.copy()
-    ant, lp, rp = rgb2mask(image)
-    print(ant, lp, rp)
+    rgb2mask(image)
 
     right = [0, 128, 0]
     center = [128, 0, 0]
@@ -325,6 +341,9 @@ def getBoneHeightWithImage(imagePath, maskRGB_arr):
     cr = addContour(outputBgRight, right, (0, 128, 128), image)
     cc = addContour(outputBgCenter, center, (0, 0, 128), image)
     cl = addContour(outputBgLeft, left, (0, 128, 0), image)
+
+    if(len(cr) == 0 or len(cc) == 0 or len(cl) == 0):
+      return 0,0,0
 
     imgR = cv2.cvtColor(outputBgRight, cv2.COLOR_BGR2GRAY)
     imgL = cv2.cvtColor(outputBgLeft, cv2.COLOR_BGR2GRAY)
