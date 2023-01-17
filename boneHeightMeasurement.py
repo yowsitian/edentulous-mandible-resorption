@@ -315,7 +315,6 @@ def getHeight(img,outputBg, contourCoorList, fileName, ori):
   finalPlot(filtered_x_upper_coors, filtered_x_lower_coors, middle_coors, found_match, bottom_left, bottom_right, test_x, test_y, matched, fileName, ori)
 
   height_cm = height * 2.54 / 96
-  height_cm = round(height_cm, 2)
   return height_cm
 
 def getBoneHeightWithImage(ori_input_image, maskRGB_arr):

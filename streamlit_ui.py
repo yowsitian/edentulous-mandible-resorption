@@ -76,7 +76,7 @@ with left:
     )
     with open("sample_image_input.JPG", "rb") as file:
         btn = st.download_button(
-            label="Download image input sample",
+            label="Download sample image for data testing",
             data=file,
             file_name="sample_image_input.JPG",
             mime="image/png"
@@ -330,19 +330,19 @@ if uploaded_data is not None:
         colA, colB, colC = st.columns([1,1,1])
         with colA:
             if bR: 
-                st.metric("Right Posterior Mandible", estSevCR[0], f"Bone Height: {str(boneHeightR)} cm")
+                st.metric("Right Posterior Mandible", estSevCR[0], f"Bone Height: {(boneHeightR*0.5417774472783):.2f} cm")
             else:
                 st.metric("Right Posterior Mandible", "Region not found")
     
         with colB:
             if bC:
-                st.metric("Anterior Mandible", estSevCC[0], f"Bone Height: {str(boneHeightC)} cm")
+                st.metric("Anterior Mandible", estSevCC[0], f"Bone Height: {(boneHeightC*0.5417774472783):.2f} cm")
             else:
                 st.metric("Anterior Mandible", "Region not found")
     
         with colC:
             if bL:
-                st.metric("Left Posterior Mandible", estSevCL[0], f"Bone Height: {str(boneHeightL)} cm") 
+                st.metric("Left Posterior Mandible", estSevCL[0], f"Bone Height: {(boneHeightL*0.5417774472783):.2f} cm") 
             else:
                 st.metric("Left Posterior Mandible", "Region not found") 
     
