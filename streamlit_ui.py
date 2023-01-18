@@ -74,15 +74,44 @@ with left:
     type=['png','jpg', 'jpeg'],
     accept_multiple_files=False
     )
-    with open("sample_image_input.JPG", "rb") as file:
-        btn = st.download_button(
-            label="Download sample image for data testing",
-            data=file,
-            file_name="sample_image_input.JPG",
-            mime="image/png"
-        )
+    # with open("sample_image_input.JPG", "rb") as file:
+    #     btn = st.download_button(
+    #         label="Download sample image for data testing",
+    #         data=file,
+    #         file_name="sample_image_input.JPG",
+    #         mime="image/png"
+    #     )
     boneHeightImage = Image.open('boneHeightRange2.png')
-    st.image(boneHeightImage, caption='Bone height range for each region and severity level from the current database')      
+    st.image(boneHeightImage, caption='Bone height range for each region and severity level from the current database')   
+
+with right:
+    st.text(' ')
+    st.text(' ')
+    with st.expander("Download sample dental panoramic radiograph images for data input testing"):
+        with open("sample_image_input.JPG", "rb") as file1:
+            btn1 = st.download_button(
+                label="Sample Image 1",
+                data=file1,
+                file_name="sample_image_input_1.JPG",
+                mime="image/jpg",
+                key = "Sample Image 1"
+            )
+        with open("sample_image_input_2.JPG", "rb") as file2:
+            btn2 = st.download_button(
+                label="Sample Image 2",
+                data=file2,
+                file_name="sample_image_input_2.JPG",
+                mime="image/jpg",
+                key = "Sample Image 2"
+            )
+        with open("sample_image_input_3.JPG", "rb") as file3:
+            btn3 = st.download_button(
+                label="Sample Image 3",
+                data=file3,
+                file_name="sample_image_input_3.JPG",
+                mime="image/jpg",
+                key = "Sample Image 3"
+            )
 
 def displayOriImage(d):
     data = d.getvalue()
