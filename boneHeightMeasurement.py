@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import cv2
 import math
 from itertools import product
-
+from skimage.measure import regionprops_table
 def groupRegion(code):
   if(code == 0):
     return 0
@@ -132,7 +132,51 @@ def finalPlot(filtered_x_upper_coors, filtered_x_lower_coors, middle_coors, foun
   plt.gca().invert_yaxis()
   plt.savefig(f'my_plot_{fileName}.png', transparent=True,bbox_inches='tight')
 
-def getUpAndLowCoor(squeezed_cr, index_tl, index_tr, index_bl, index_br, top_left, top_right):
+def getUpAndLowCoor2(squeezed_cr, bottom_left,bottom_right, top_left, top_right, centroid):
+  upper_coors, lower_coors = [], []
+  for i in squeezed_cr:
+    x = i[0]
+    y = i[1]
+
+    if(y>=centroid[1]):
+      # bottom
+      if(x>=bottom_left[0] and x<=bottom_right[0]):
+        lower_coors.append(i)
+    else:
+      # up
+      if(x>=top_left[0] and x<=top_right[0]):
+        upper_coors.append(i)
+
+  threshold = 200
+  low_is_not_empty = len(lower_coors) >= threshold
+  up_is_not_empty = len(upper_coors) >= threshold
+  low_is_empty = len(lower_coors) < threshold
+  up_is_empty = len(upper_coors) < threshold
+
+  if(low_is_not_empty and up_is_not_empty):
+    return [upper_coors, lower_coors]
+
+  if(low_is_empty):
+    lower_coors = []
+  if(up_is_empty):
+    upper_coors = []
+  for i in squeezed_cr:
+    x = i[0]
+    y = i[1]
+    min_x = min(bottom_left[0],top_left[0])
+    max_x = max(bottom_right[0], top_right[0])
+    
+    if(y>=centroid[1]):
+      # bottom
+      if(x>min_x and x<max_x and low_is_empty):
+        lower_coors.append(i)
+    else:
+      # up
+      if(x>min_x and x<max_x and up_is_empty):
+        upper_coors.append(i)
+  return [upper_coors, lower_coors]
+
+def getUpAndLowCoor1(squeezed_cr, index_tl, index_tr, index_bl, index_br):
   upper_coors, lower_coors = [], []
   firstCoor = min([index_tl, index_tr, index_bl, index_br])
 
@@ -185,6 +229,12 @@ def order_points(pts):
     return rect.tolist()
 
 def getHeight(img,outputBg, contourCoorList, fileName, ori):
+  props = regionprops_table(img, properties=('centroid',
+                                                 'orientation',
+                                                 'major_axis_length',
+                                                 'minor_axis_length'))
+  centroid_coor = [props['centroid-1'][0], props['centroid-0'][0]]
+
   ori_edges = plotEdgePoints(outputBg, contourCoorList)
   ori_edges = [list(ele) for ele in ori_edges]
   squeezed_cr = contourCoorList.copy().squeeze().tolist()
@@ -225,13 +275,15 @@ def getHeight(img,outputBg, contourCoorList, fileName, ori):
   
   if flag:
     return 0
-
   index_tl = squeezed_cr.index(top_left)
   index_tr = squeezed_cr.index(top_right)
   index_br = squeezed_cr.index(bottom_right)
   index_bl = squeezed_cr.index(bottom_left)
 
-  coors = getUpAndLowCoor(squeezed_cr, index_tl, index_tr, index_bl, index_br, top_left, top_right)  
+  coors = getUpAndLowCoor1(squeezed_cr, index_tl, index_tr, index_bl, index_br) 
+  threshold = 200
+  if(len(coors[0]) < threshold or len(coors[1]) < threshold):
+    coors = getUpAndLowCoor2(squeezed_cr, bottom_left,bottom_right, top_left, top_right, centroid_coor)  
   upper_coors = coors[0]
   lower_coors = coors[1]
 
@@ -336,9 +388,9 @@ def getBoneHeightWithImage(ori_input_image, maskRGB_arr):
     outputBgLeft = cv2.bitwise_and(image, image, mask=maskBg)
     outputBgCenter = cv2.bitwise_and(image, image, mask=maskBg)
 
-    cr = addContour(outputBgRight, right, (0, 128, 128), image)
+    cr = addContour(outputBgRight, left, (0, 128, 128), image)
     cc = addContour(outputBgCenter, center, (0, 0, 128), image)
-    cl = addContour(outputBgLeft, left, (0, 128, 0), image)
+    cl = addContour(outputBgLeft, right, (0, 128, 0), image)
 
     if(len(cr) == 0 or len(cc) == 0 or len(cl) == 0):
       return 0,0,0

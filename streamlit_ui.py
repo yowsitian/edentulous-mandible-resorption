@@ -112,6 +112,22 @@ with right:
                 mime="image/jpg",
                 key = "Sample Image 3"
             )
+        with open("sample_image_input_4.JPG", "rb") as file4:
+            btn4 = st.download_button(
+                label="Sample Image 4",
+                data=file4,
+                file_name="sample_image_input_4.JPG",
+                mime="image/jpg",
+                key = "Sample Image 4"
+            )
+        with open("sample_image_input_5.JPG", "rb") as file5:
+            btn4 = st.download_button(
+                label="Sample Image 5",
+                data=file5,
+                file_name="sample_image_input_5.JPG",
+                mime="image/jpg",
+                key = "Sample Image 5"
+            )
 
 def displayOriImage(d):
     data = d.getvalue()
@@ -337,13 +353,13 @@ if uploaded_data is not None:
 
         col1, col2, col3 = st.columns([1,1,1])
 
-        bR = regionIsValid('my_plot_left.png', boneHeightR)
+        bR = regionIsValid('my_plot_right.png', boneHeightR)
         bC = regionIsValid('my_plot_center.png', boneHeightC)
-        bL = regionIsValid('my_plot_right.png', boneHeightL)
+        bL = regionIsValid('my_plot_left.png', boneHeightL)
 
         with col1:
             if bR:
-                rightImage = Image.open('my_plot_left.png')
+                rightImage = Image.open('my_plot_right.png')
                 st.image(rightImage, caption=None)      
     
         with col2:
@@ -353,7 +369,7 @@ if uploaded_data is not None:
     
         with col3:
             if bL:
-                leftImage = Image.open('my_plot_right.png')
+                leftImage = Image.open('my_plot_left.png')
                 st.image(leftImage, caption=None)   
         
         colA, colB, colC = st.columns([1,1,1])
