@@ -21,6 +21,7 @@ import boneHeightMeasurement as bhm
 # functions
 
 # Loading model from checkpoint
+@st.cache
 def load_model(model, checkpoint):
     state_dict = torch.load(checkpoint, map_location=torch.device('cpu'))
     if "model_state_dict" in state_dict.keys():
