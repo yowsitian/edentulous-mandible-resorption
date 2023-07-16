@@ -21,18 +21,18 @@ import boneHeightMeasurement as bhm
 # functions
 
 # Loading model from checkpoint
-@st.cache
-def load_model(model, checkpoint):
-    state_dict = torch.load(checkpoint, map_location=torch.device('cpu'))
-    if "model_state_dict" in state_dict.keys():
-        state_dict = state_dict['model_state_dict']
+# @st.cache
+# def load_model(model, checkpoint):
+#     state_dict = torch.load(checkpoint, map_location=torch.device('cpu'))
+#     if "model_state_dict" in state_dict.keys():
+#         state_dict = state_dict['model_state_dict']
         
-    state_dict = {k[7:] if k.startswith('module.') else k : state_dict[k] for k in state_dict.keys()}
+#     state_dict = {k[7:] if k.startswith('module.') else k : state_dict[k] for k in state_dict.keys()}
     
-    model.load_state_dict(state_dict)
-    model.eval()
+#     model.load_state_dict(state_dict)
+#     model.eval()
     
-    return model
+#     return model
 
 # Specify title
 
